@@ -30,27 +30,37 @@ install.packages(c("shiny", "xml2", "jsonlite", "dplyr", "tidyr", "DT", "devtool
 Use the `devtools` package to install the app from GitHub:
 
 ```r
-devtools::install_github("BoyceLab/CDAtransformer")
+devtools::install_github("BoyceLab/CDAtransformer", force = TRUE)
 ```
 
 ## Usage
 
-1. **Run the App:**
+1. **Set the Working Directory:**
 
-   Open RStudio and run the following command to start the Shiny app:
+   Open RStudio and set the working directory to where your `app.R` file is located:
 
    ```r
-   library(yourpackage)
-   runApp()
+   setwd("path/to/CDAtransformer")
    ```
 
-2. **Upload a File:**
+   Replace `"path/to/CDAtransformer"` with the actual path to the cloned repository.
+
+2. **Run the App:**
+
+   Load the required packages and run the Shiny app:
+
+   ```r
+   library(shiny)
+   runApp(".")
+   ```
+
+3. **Upload a File:**
 
    - Click the "Choose CDA or FHIR Text File" button to upload your text file.
    - Select the file type (CDA or FHIR).
    - Click the "Parse Document" button to parse and display the contents.
 
-3. **Download Parsed Data:**
+4. **Download Parsed Data:**
 
    - Click the "Download CSV" button to download the parsed data as a CSV file.
 
@@ -82,4 +92,4 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
+
