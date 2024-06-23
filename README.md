@@ -24,7 +24,11 @@ Open RStudio and run the following commands to install the necessary packages:
 ```r
 install.packages(c("shiny", "xml2", "jsonlite", "dplyr", "tidyr", "DT", "devtools"))
 ```
-
+### Clone the Repository from GitHub
+Open a terminal or command prompt and navigate to the directory where you want to clone the repository. Then, run the following command:
+```r
+git clone https://github.com/BoyceLab/CDAtransformer.git
+```
 ### Install the App from GitHub
 
 Use the `devtools` package to install the app from GitHub:
