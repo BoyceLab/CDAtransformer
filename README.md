@@ -2,8 +2,6 @@
 
 This Shiny application allows users to upload and parse C-CDA and FHIR text files. It extracts relevant elements and presents them in a tabular format for easy viewing and download. 
 
-This Shiny application allows users to upload and parse C-CDA and FHIR text files. It extracts relevant elements and presents them in a tabular format for easy viewing and download.
-
 ![Screenshot of the Boyce Lab C-CDA and FHIR Data Converter](https://github.com/BoyceLab/CDAtransformer/blob/main/Screenshot%202024-06-23%20203614.jpg)
 
 ## Features
