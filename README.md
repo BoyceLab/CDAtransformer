@@ -1,101 +1,175 @@
-# Boyce Lab C-CDA and FHIR Data Converter
+# CDAtransformer
 
-This Shiny application allows users to upload and parse C-CDA and FHIR text files. It extracts relevant elements and presents them in a tabular format for easy viewing and download. 
+**CDAtransformer** is an R Shiny application for parsing **C-CDA (CDA XML)** and **FHIR (JSON)** clinical documents into analysis-ready tabular outputs.
 
-![Screenshot of the Boyce Lab C-CDA and FHIR Data Converter](https://github.com/BoyceLab/CDAtransformer/blob/main/Screenshot%202024-06-23%20203614.jpg)
+The application supports both single-document uploads and table-based datasets where each row contains a complete document payload associated with a patient identifier.
+
+---
+
+## Overview
+
+Clinical data are frequently distributed as nested XML or JSON documents (C-CDA or FHIR), which are difficult to analyze directly in R. `CDAtransformer` extracts structured elements from these documents and returns tidy tables suitable for filtering, joins, and downstream analysis.
+
+This tool is intended for research, informatics, and data science workflows using exported electronic health record (EHR) data.
+
+---
 
 ## Features
 
-- Upload C-CDA and FHIR text files (up to 30MB)
-- Parse and display the contents of C-CDA and FHIR files
-- Download the parsed data as a CSV file
+- Parse **C-CDA (CDA XML)** documents
+- Parse **FHIR JSON**, including Bundle and `searchset` responses
+- Accept either:
+  - Single document uploads, or
+  - CSV datasets containing one full document per row
+- Preserve patient identifiers in all outputs
+- Multiple export formats:
+  - Long (tidy, recommended)
+  - Wide (single-row summary)
+  - FHIR split export (one CSV per resource type)
+
+---
+
+## Supported Input Formats
+
+### C-CDA (CDA XML)
+
+#### Single document upload
+
+Upload a `.txt` file containing **one complete C-CDA XML document**.
+
+#### Dataset upload (CSV)
+
+The CSV file must contain **exactly two columns**:
+
+| Column name   | Description |
+|-------------|-------------|
+| `patient_id` | Identifier used to link results back to the patient |
+| `doc`        | Full C-CDA XML document as a single string |
+
+**Important:**  
+Each row in `doc` must contain **one complete XML document**. If XML content is split across rows due to quoting or newline issues, parsing will fail.
+
+---
+
+### FHIR
+
+#### Single document upload
+
+Upload a `.txt` file where **each non-empty line** is a valid JSON object:
+- a FHIR resource, or
+- a FHIR Bundle (e.g., `searchset`)
+
+#### Dataset upload (CSV)
+
+The CSV file must contain **exactly two columns**:
+
+| Column name    | Description |
+|--------------|-------------|
+| `patient_id`  | Identifier used to link results back to the patient |
+| `record_body` | JSON string containing a FHIR resource or Bundle |
+
+FHIR Bundles with `entry[].resource` elements are supported.
+
+---
+
+## Output Formats
+
+### Long format (recommended)
+
+A tidy, row-based output suitable for analysis.
+
+### Wide format
+
+Collapses repeated paths into a single row per document. Intended for inspection only; not recommended for analysis.
+
+### FHIR split export
+
+Exports one CSV file per FHIR resource type (e.g., `Patient.csv`, `Condition.csv`, `Observation.csv`), packaged as a ZIP archive.
+
+Each file includes `patient_id` for linkage.
+
+---
+
+## File Size Limits
+
+Upload size is controlled in `app.R`:
+
+```r
+options(shiny.maxRequestSize = 250 * 1024^2)  # 250 MB
+```
+
+When deployed behind a proxy (e.g., nginx, Shiny Server, Posit Connect), additional upload limits may apply outside of R.
+
+---
 
 ## Installation
 
 ### Prerequisites
 
-Make sure you have R and RStudio installed on your system. You will also need the `devtools` package to install the app from GitHub.
+- R (>= 4.0)
+- RStudio (recommended)
 
-1. **Install R:** [Download R](https://cran.r-project.org/)
-2. **Install RStudio:** [Download RStudio](https://www.rstudio.com/products/rstudio/download/)
+### Install dependencies
 
-### Install Dependencies
-
-Open RStudio and run the following commands to install the necessary packages:
+<details>
+<summary>Show R commands</summary>
 
 ```r
-install.packages(c("shiny", "xml2", "jsonlite", "dplyr", "tidyr", "DT", "devtools"))
+install.packages(c(
+  "shiny", "xml2", "jsonlite", "dplyr", "tidyr", "DT",
+  "tibble", "zip", "readr", "tools"
+))
 ```
-### Clone the Repository from GitHub
-Open a terminal or command prompt and navigate to the directory where you want to clone the repository. Then, run the following command:
-```r
-git clone https://github.com/BoyceLab/CDAtransformer.git
-```
-### Install the App from GitHub
+</details>
 
-Use the `devtools` package to install the app from GitHub:
+### Install from GitHub
+
+<details>
+<summary>Show R commands</summary>
 
 ```r
+install.packages("devtools")
 devtools::install_github("BoyceLab/CDAtransformer", force = TRUE)
 ```
+</details>
+
+---
 
 ## Usage
 
-1. **Set the Working Directory:**
+Run the Shiny application:
 
-   Open RStudio and set the working directory to where your `app.R` file is located:
+<details>
+<summary>Show R commands</summary>
 
-   ```r
-   setwd("path/to/CDAtransformer")
-   ```
+```r
+library(shiny)
+runApp(".")
+```
+</details>
 
-   Replace `"path/to/CDAtransformer"` with the actual path to the cloned repository.
+---
 
-2. **Run the App:**
+## Typical dataset workflow
 
-   Load the required packages and run the Shiny app:
+1. Export clinical documents to CSV
+2. Confirm required columns:
+   - **C-CDA:** `patient_id`, `doc`
+   - **FHIR:** `patient_id`, `record_body`
+3. Upload the CSV into the application
+4. Select document type (**C-CDA** or **FHIR**)
+5. Choose an export format
+6. Download the results
 
-   ```r
-   library(shiny)
-   runApp(".")
-   ```
-
-3. **Upload a File:**
-
-   - Click the "Choose CDA or FHIR Text File" button to upload your text file.
-   - Select the file type (CDA or FHIR).
-   - Click the "Parse Document" button to parse and display the contents.
-
-4. **Download Parsed Data:**
-
-   - Click the "Download CSV" button to download the parsed data as a CSV file.
-
-## Code Overview
-
-### UI
-
-The UI is defined in the `ui` function and includes a title panel, file input, radio buttons for file type selection, a parse button, and a download button. The parsed data is displayed in a datatable.
-
-### Server
-
-The server logic is defined in the `server` function and includes:
-
-- **File Parsing:** Functions to parse CDA and FHIR files.
-- **Data Display:** Render the parsed data in a datatable.
-- **Data Download:** Allow users to download the parsed data as a CSV file.
-
-### Helper Functions
-
-- `parse_cda(file)`: Parses a CDA file and extracts relevant elements.
-- `flatten_list(x, name)`: Recursively flattens a list.
-- `parse_fhir(file)`: Parses multiple FHIR resources and flattens them.
-- `transpose_data(data)`: Transposes a data frame.
+---
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any changes.
+Contributions are welcome. Please open an issue or submit a pull request via GitHub.
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License. See the `LICENSE` file for details.
 
