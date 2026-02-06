@@ -4,6 +4,8 @@
 
 The application supports both single-document uploads and table-based datasets where each row contains a complete document payload associated with a patient identifier.
 
+![CCDASample](https://github.com/BoyceLab/CDAtransformer/blob/main/CCDASample.jpg)
+
 ---
 
 ## Overview
