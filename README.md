@@ -2,9 +2,9 @@
 
 **CDAtransformer** is an R Shiny application for parsing **C-CDA (CDA XML)** and **FHIR (JSON)** clinical documents into analysis-ready tabular outputs.
 
-The application supports both single-document uploads and table-based datasets where each row contains a complete document payload associated with a patient identifier.
+The application supports both single-document uploads and table-based data sets where each row contains a complete document payload associated with a patient identifier.
 
-![CCDASample](https://github.com/BoyceLab/CDAtransformer/blob/main/CCDASample.jpg)
+![FHIRSample](https://github.com/BoyceLab/CDAtransformer/blob/main/CCDASample.jpg)
 
 ---
 
@@ -22,7 +22,7 @@ This tool is intended for research, informatics, and data science workflows usin
 - Parse **FHIR JSON**, including Bundle and `searchset` responses
 - Accept either:
   - Single document uploads, or
-  - CSV datasets containing one full document per row
+  - CSV data sets containing one full document per row
 - Preserve patient identifiers in all outputs
 - Multiple export formats:
   - Long (tidy, recommended)
@@ -39,7 +39,7 @@ This tool is intended for research, informatics, and data science workflows usin
 
 Upload a `.txt` file containing **one complete C-CDA XML document**.
 
-#### Dataset upload (CSV)
+#### Data set upload (CSV)
 
 The CSV file must contain **exactly two columns**:
 
@@ -61,7 +61,7 @@ Upload a `.txt` file where **each non-empty line** is a valid JSON object:
 - a FHIR resource, or
 - a FHIR Bundle (e.g., `searchset`)
 
-#### Dataset upload (CSV)
+#### Data set upload (CSV)
 
 The CSV file must contain **exactly two columns**:
 
@@ -152,7 +152,7 @@ runApp(".")
 
 ---
 
-## Typical dataset workflow
+## Typical data set workflow
 
 1. Export clinical documents to CSV
 2. Confirm required columns:
