@@ -1,5 +1,5 @@
 # ===========================
-# Boyce Lab C-CDA and FHIR Data Converter 
+# Boyce Lab C-CDA and FHIR Data Converter
 #
 # Supports:
 # - C-CDA (CDA XML):
@@ -96,19 +96,55 @@ transpose_data <- function(data) {
 }
 
 # ---------------------------
-# C-CDA parsing
+# C-CDA parsing (preserve coded attributes like ICD codes)
 # ---------------------------
 
+# Helper: create (path, value) rows for node text + attributes
+ccda_node_rows <- function(node) {
+  rows <- list()
+  
+  # 1) Text content (if non-empty)
+  txt <- trimws(xml_text(node))
+  if (nzchar(txt)) {
+    rows[[length(rows) + 1]] <- tibble(
+      path  = paste0(xml_path(node), "/text()"),
+      value = txt
+    )
+  }
+  
+  # 2) Attributes (this is where ICD codes usually live)
+  attrs <- xml_attrs(node)
+  if (length(attrs) > 0) {
+    rows[[length(rows) + 1]] <- tibble(
+      path  = paste0(xml_path(node), "/@", names(attrs)),
+      value = unname(as.character(attrs))
+    )
+  }
+  
+  if (!length(rows)) return(NULL)
+  bind_rows(rows)
+}
+
 # Parse a single C-CDA XML string into long rows (returns NULL if parsing fails)
-parse_ccda_xml_string <- function(xml_string, doc_id = "doc1", patient_id = NA_character_, row_index = NA_integer_) {
+parse_ccda_xml_string <- function(xml_string,
+                                  doc_id = "doc1",
+                                  patient_id = NA_character_,
+                                  row_index = NA_integer_) {
   if (is.na(xml_string) || !nzchar(trimws(xml_string))) return(NULL)
   
   doc <- tryCatch(read_xml(xml_string), error = function(e) NULL)
   if (is.null(doc)) return(NULL)
   
-  # Reduce redundancy: keep only nodes with non-whitespace text
-  nodes <- xml_find_all(doc, "//*[local-name()='ClinicalDocument']//*[normalize-space(text())]")
+  # Pull *all* elements under ClinicalDocument (not just text-bearing nodes)
+  nodes <- xml_find_all(
+    doc,
+    "//*[local-name()='ClinicalDocument']//*[self::*]"
+  )
   if (length(nodes) == 0) return(NULL)
+  
+  out <- lapply(nodes, ccda_node_rows)
+  out <- bind_rows(Filter(Negate(is.null), out))
+  if (nrow(out) == 0) return(NULL)
   
   tibble(
     doc_id = doc_id,
@@ -118,8 +154,8 @@ parse_ccda_xml_string <- function(xml_string, doc_id = "doc1", patient_id = NA_c
     row_index = row_index,
     bundle_entry_index = NA_integer_,
     resource_id = NA_character_,
-    path = xml_name(nodes),
-    value = xml_text(nodes)
+    path = out$path,
+    value = out$value
   )
 }
 
@@ -306,7 +342,7 @@ ui <- fluidPage(
         accept = c(".txt", ".csv")
       ),
       
-      # Label as C-CDA, keep internal value "CDA" to avoid breaking logic if you prefer.
+      # Label as C-CDA, keep internal value "CCDA"
       radioButtons("fileType", "File Type", choices = c("C-CDA" = "CCDA", "FHIR" = "FHIR")),
       
       radioButtons(
@@ -368,7 +404,6 @@ server <- function(input, output, session) {
     req(parsed_data())
     df <- parsed_data()
     
-    # Show key provenance columns; resource_type/resource_id relevant mostly for FHIR
     datatable(
       df[, c("patient_id","value","path","resource_type","row_index","bundle_entry_index","resource_id")],
       options = list(
@@ -400,7 +435,6 @@ server <- function(input, output, session) {
       
       # ---- Wide (1 row) ----
       if (input$exportFormat == "wide") {
-        # Keep one patient_id value (if present) in the wide output
         pid <- df$patient_id[!is.na(df$patient_id)][1] %||% NA_character_
         
         wide_pairs <- df %>%
