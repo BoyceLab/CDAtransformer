@@ -1203,6 +1203,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources &amp; related tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../databricks/" class="md-nav__link">
         
   
@@ -1546,7 +1573,7 @@ code that produces these files.</p>
 warehouse-specific tooling, and travels through any data-sharing workflow
 (email, sftp, object storage). The chunking pattern handles multi-megabyte
 clinical documents that would otherwise exceed CSV cell-size limits.</p>
-<p><strong>Cross-bundle global indexing.</strong> Real-world FHIR exports often place
+<p><strong>Cross-bundle global indexing.</strong> Real world FHIR exports often place
 <code>Medication</code> resources in a separate bundle from the <code>MedicationRequest</code>
 that references them. Stage 3 does a pre-pass over all bundles to build
 global <code>Medication</code> and <code>DocumentReference</code> indices before any per-bundle

@@ -1227,6 +1227,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources &amp; related tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../databricks/" class="md-nav__link">
         
   
@@ -1468,7 +1495,7 @@
 <p><code>note_extraction.py</code> reads <code>dashboard_data.json</code> and walks every free-text source &mdash; CCDA section narratives in the <code>notes</code> array and the <code>plain_text</code> field of each decoded document &mdash; matching a library of regular expressions. The output is a single CSV (<code>note_extractions.csv</code>) with one row per match: patient, source kind, source identifier, pattern name, captured value, surrounding snippet, character offset, and a one-line description.</p>
 <p>This is a <strong>starter</strong> module, not validated NLP. Local clinical phrasing varies a lot, so every pattern needs site-specific tuning before captured values feed analysis. For production clinical NLP, look at cTAKES, MedSpaCy, or Clinical-BERT-based pipelines. The patterns shipped here are aimed at things that are commonly missing from discrete coded fields and have to be reconstructed from notes.</p>
 <h2 id="why-its-needed">Why it's needed<a class="headerlink" href="#why-its-needed" title="Permanent link">&para;</a></h2>
-<p>Even a well-coded EHR export is missing things that matter to a natural-history registry:</p>
+<p>Even a well-coded EHR export is missing things that matter to a natural history registry:</p>
 <ul>
 <li><strong>Disease severity at a point in time</strong> &mdash; ALSFRS-R and ECAS scores are recorded as note text, not as discrete observations, in most EHR systems. (LOINC 67131-4 exists for ALSFRS-R but is rarely populated.)</li>
 <li><strong>Diagnostic certainty</strong> &mdash; El Escorial / Awaji-Shima classification ("clinically probable ALS") almost never reaches a discrete field.</li>
@@ -1540,7 +1567,7 @@
 </code></pre></div>
 <p>The log at the end of the run summarizes per-pattern hit counts and per-patient match totals &mdash; quick eyeball check that the patterns actually fired.</p>
 <h2 id="adapting-to-your-data">Adapting to your data<a class="headerlink" href="#adapting-to-your-data" title="Permanent link">&para;</a></h2>
-<p>Local phrasing matters. The shipped patterns were written against synthetic and lightly-disguised examples and miss a lot of real-world variation. Steps to localize:</p>
+<p>Local phrasing matters. The shipped patterns were written against synthetic and lightly-disguised examples and miss a lot of real world variation. Steps to localize:</p>
 <ol>
 <li><strong>Sample first.</strong> Pull a few hundred narrative documents from your bundle and grep for each pattern's anchor word (<code>ALSFRS</code>, <code>ECAS</code>, <code>family history</code>, <code>FVC</code>, <code>riluzole</code>). Read the matches and the surrounding sentences.</li>
 <li><strong>Add alternations.</strong> "ALSFRS-R: 32" and "ALSFRS-R 32/48" and "Total ALSFRS-R score is thirty-two" all need to match. The shipped patterns handle the first two; the third would need a numeric-words extension.</li>
